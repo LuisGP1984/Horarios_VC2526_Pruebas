@@ -818,7 +818,7 @@
           "2": {"tipo": "clase", "sigla": "", "grupo": "1BCB Física y Química", "materia": "", "aula": "108"},
           "3": {"tipo": "actividad", "sigla": "TLEC", "grupo": "", "materia": "", "aula": ""},
           "3R": {"tipo": "clase", "sigla": "", "grupo": "02D", "materia": "Física y Química", "aula": "B08"},
-          "5": {"tipo": "otro", "sigla": "G G", "grupo": "", "materia": "G G", "aula": ""},
+          "5": {"tipo": "actividad", "sigla": "G", "grupo": "", "materia": "", "aula": ""},
           "6": {"tipo": "actividad", "sigla": "RDP", "grupo": "", "materia": "", "aula": ""},
           "7": {"tipo": "clase", "sigla": "", "grupo": "1BCA Física y Química", "materia": "", "aula": "109"}
         },
@@ -1158,40 +1158,6 @@
           "5": {"tipo": "clase", "sigla": "", "grupo": "CG2 Productos culinarios", "materia": "", "aula": "CC1"},
           "6": {"tipo": "clase", "sigla": "", "grupo": "CG2 Productos culinarios", "materia": "", "aula": "CC1"},
           "7": {"tipo": "clase", "sigla": "", "grupo": "CG2 Productos culinarios", "materia": "", "aula": "CC1"}
-        }
-      }
-    },
-    "DPMVXX": {
-      "nombre": "DIEZ PUERTAS, MARIA DEL VALL",
-      "horario": {
-        "Lunes": {
-          "2": {"tipo": "clase", "sigla": "", "grupo": "02A", "materia": "- 02C Segunda Lengua Extranjera: Francés", "aula": "B03"},
-          "3": {"tipo": "otro", "sigla": "G G", "grupo": "", "materia": "G G", "aula": ""},
-          "3R": {"tipo": "actividad", "sigla": "AMP", "grupo": "", "materia": "", "aula": ""},
-          "5": {"tipo": "clase", "sigla": "", "grupo": "01B Segunda Lengua Extranjera: Francés", "materia": "", "aula": "B03"},
-          "6": {"tipo": "clase", "sigla": "", "grupo": "03C", "materia": "- 03B - 03A Segunda Lengua Extranjera: Francés", "aula": "103"}
-        },
-        "Martes": {
-          "3": {"tipo": "clase", "sigla": "", "grupo": "02A", "materia": "- 02C Segunda Lengua Extranjera: Francés", "aula": "B03"},
-          "3R": {"tipo": "otro", "sigla": "G G", "grupo": "", "materia": "G G", "aula": ""},
-          "5": {"tipo": "otro", "sigla": "RDP RDP", "grupo": "", "materia": "RDP RDP", "aula": ""},
-          "6": {"tipo": "clase", "sigla": "", "grupo": "GU1 Segunda lengua extranjera Francés", "materia": "", "aula": "120"},
-          "7": {"tipo": "clase", "sigla": "", "grupo": "04A Segunda Lengua Extranjera: Francés", "materia": "", "aula": "205"}
-        },
-        "Miercoles": {
-          "2": {"tipo": "clase", "sigla": "", "grupo": "02C Medidas de Atención Educativa", "materia": "", "aula": "B11B"},
-          "3": {"tipo": "otro", "sigla": "AMP AC AMP", "grupo": "", "materia": "AMP AC AMP", "aula": ""},
-          "3R": {"tipo": "otro", "sigla": "G G", "grupo": "", "materia": "G G", "aula": ""},
-          "5": {"tipo": "otro", "sigla": "AC AC", "grupo": "", "materia": "AC AC", "aula": ""},
-          "6": {"tipo": "clase", "sigla": "", "grupo": "03C, 03B, 03A Segunda Lengua Extranjera: Francés", "materia": "", "aula": "103"},
-          "7": {"tipo": "clase", "sigla": "", "grupo": "01C Segunda Lengua Extranjera: Francés", "materia": "", "aula": "B06"}
-        },
-        "Jueves": {
-          "2": {"tipo": "clase", "sigla": "", "grupo": "GU1 Segunda lengua extranjera Francés", "materia": "", "aula": "120"},
-          "3": {"tipo": "clase", "sigla": "", "grupo": "01B Segunda Lengua Extranjera: Francés", "materia": "", "aula": "B03"},
-          "3R": {"tipo": "actividad", "sigla": "AC", "grupo": "", "materia": "", "aula": ""},
-          "6": {"tipo": "clase", "sigla": "", "grupo": "02D Medidas de Atención Educativa", "materia": "", "aula": "115"},
-          "7": {"tipo": "clase", "sigla": "", "grupo": "04A Segunda Lengua Extranjera: Francés", "materia": "", "aula": "205"}
         }
       }
     },
@@ -1975,7 +1941,7 @@
           "2": {"tipo": "clase", "sigla": "", "grupo": "04B, 04C Matemáticas B", "materia": "", "aula": "107"},
           "3": {"tipo": "clase", "sigla": "", "grupo": "02C Conocimiento de las matemáticas", "materia": "", "aula": "B07"},
           "3R": {"tipo": "clase", "sigla": "", "grupo": "02C", "materia": "Matemáticas", "aula": "B07"},
-          "5": {"tipo": "otro", "sigla": "G G", "grupo": "", "materia": "G G", "aula": ""},
+          "5": {"tipo": "actividad", "sigla": "G", "grupo": "", "materia": "", "aula": ""},
           "6": {"tipo": "clase", "sigla": "", "grupo": "02B", "materia": "Matemáticas", "aula": "B06"}
         },
         "Miercoles": {
@@ -1993,7 +1959,7 @@
           "8": {"tipo": "actividad", "sigla": "RDP", "grupo": "", "materia": "", "aula": ""}
         },
         "Viernes": {
-          "3": {"tipo": "otro", "sigla": "CHL CHL", "grupo": "", "materia": "CHL CHL", "aula": ""},
+          "3": {"tipo": "actividad", "sigla": "CHL", "grupo": "", "materia": "", "aula": ""},
           "3R": {"tipo": "clase", "sigla": "", "grupo": "04B", "materia": "- 4E Conocimiento de las matemáticas", "aula": "106"},
           "5": {"tipo": "clase", "sigla": "", "grupo": "02D Conocimiento de las Matemáticas", "materia": "", "aula": "B07"},
           "6": {"tipo": "clase", "sigla": "", "grupo": "02C", "materia": "Matemáticas", "aula": "B07"},
@@ -2173,7 +2139,7 @@
         "Martes": {
           "3": {"tipo": "clase", "sigla": "", "grupo": "01D", "materia": "Inglés", "aula": "B01"},
           "3R": {"tipo": "actividad", "sigla": "G", "grupo": "", "materia": "", "aula": ""},
-          "5": {"tipo": "otro", "sigla": "TUT TUT", "grupo": "", "materia": "TUT TUT", "aula": ""},
+          "5": {"tipo": "actividad", "sigla": "TUT", "grupo": "", "materia": "", "aula": ""},
           "6": {"tipo": "clase", "sigla": "", "grupo": "01D", "materia": "Biología y Geología", "aula": "B12"},
           "7": {"tipo": "clase", "sigla": "", "grupo": "01D", "materia": "Matemáticas", "aula": "B12"}
         },
@@ -3078,7 +3044,7 @@
         "Martes": {
           "3": {"tipo": "actividad", "sigla": "RT", "grupo": "", "materia": "", "aula": ""},
           "3R": {"tipo": "actividad", "sigla": "TLEC", "grupo": "", "materia": "", "aula": ""},
-          "5": {"tipo": "otro", "sigla": "TUT TUT", "grupo": "", "materia": "TUT TUT", "aula": ""},
+          "5": {"tipo": "actividad", "sigla": "TUT", "grupo": "", "materia": "", "aula": ""},
           "6": {"tipo": "clase", "sigla": "", "grupo": "01B Tecnología y Digitalización", "materia": "", "aula": "114"},
           "7": {"tipo": "clase", "sigla": "", "grupo": "01C", "materia": "Tecnología y Digitalización", "aula": "B09"}
         },
@@ -3159,7 +3125,7 @@
           "2": {"tipo": "clase", "sigla": "", "grupo": "FPB1 Ciencias aplicadas I", "materia": "", "aula": "117"},
           "3": {"tipo": "actividad", "sigla": "RT", "grupo": "", "materia": "", "aula": ""},
           "3R": {"tipo": "clase", "sigla": "", "grupo": "4E Ambito Práctico", "materia": "", "aula": "205"},
-          "5": {"tipo": "otro", "sigla": "TUT TUT", "grupo": "", "materia": "TUT TUT", "aula": ""},
+          "5": {"tipo": "actividad", "sigla": "TUT", "grupo": "", "materia": "", "aula": ""},
           "6": {"tipo": "clase", "sigla": "", "grupo": "01A Tecnología y Digitalización", "materia": "", "aula": "B02"}
         },
         "Miercoles": {
