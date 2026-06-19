@@ -1,11 +1,15 @@
 # 📅 Gestión de Horarios — IES Virgen de la Calle (Palencia) 2025/26
+### 🧪 Repositorio de pruebas
 
 Aplicación web para la gestión de horarios, ausencias, guardias y actividades del IES Virgen de la Calle de Palencia.
 
+> Este repositorio es una **copia de prueba** aislada de producción, usada para validar cambios (estructura de datos, macro de generación del JSON, etc.) antes de aplicarlos a la web real.
+
 ## 🌐 URLs
 
-- **Producción**: https://horarios-iesvc-2526.netlify.app
-- **Repositorio**: https://github.com/LuisGP1984/Horarios_IES_VC_25_26 (privado)
+- **Prueba (GitHub Pages)**: https://luisgp1984.github.io/Horarios_VC2526_Pruebas/
+- **Repositorio**: https://github.com/LuisGP1984/Horarios_VC2526_Pruebas
+- **Producción** (web real, no tocar desde aquí): https://horarios-iesvc-2526.netlify.app
 
 ## 🗂️ Archivos
 
@@ -74,6 +78,8 @@ Aplicación web para la gestión de horarios, ausencias, guardias y actividades 
 
 ## 🗄️ Base de datos (Supabase)
 
+> ⚠️ Este repositorio de pruebas usa una **instancia de Supabase propia**, distinta de la de producción. Ver `supabase_schema.sql` para crear las tablas desde cero.
+
 ```sql
 -- Ausencias
 ausencias (id, fecha, codigo, nombre, sesiones jsonb, created_at)
@@ -110,7 +116,7 @@ acex (id, fecha, sesiones text[], docentes, grupos, observaciones, created_at)
 
 - **Frontend**: HTML + CSS + JavaScript (vanilla, sin frameworks)
 - **Base de datos**: Supabase (PostgreSQL)
-- **Hosting**: Netlify
+- **Hosting**: GitHub Pages (en este repositorio de pruebas)
 - **Datos de horarios**: JSON generado desde Excel con macro VBA
 - **PWA**: manifest.json + meta tags Apple
 
@@ -123,3 +129,4 @@ luis.gonpos@educa.jcyl.es
 
 ---
 *v2.0 · Junio 2026 · Desarrollado con Claude AI*
+*Repositorio de pruebas — no usar como fuente de datos reales del centro*
