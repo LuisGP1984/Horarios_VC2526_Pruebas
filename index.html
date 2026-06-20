@@ -3290,8 +3290,8 @@ async function ahoraRender() {
             <span style="font-size:1.1rem">🎒</span>
             <div>
               <div style="font-weight:700;font-size:.82rem;color:#6d28d9">ACEX en curso</div>
-              ${a.grupos?`<div style="font-size:.75rem;color:var(--text-mid)">👥 ${a.grupos}</div>`:''}
-              ${a.docentes?`<div style="font-size:.75rem;color:var(--text-mid)">👨‍🏫 ${a.docentes}</div>`:''}
+              ${a.grupos&&a.grupos.length?`<div style="font-size:.75rem;color:var(--text-mid)">👥 ${acexArrayToStr(a.grupos)}</div>`:''}
+              ${a.docentes&&a.docentes.length?`<div style="font-size:.75rem;color:var(--text-mid)">👨‍🏫 ${acexArrayToStr(a.docentes)}</div>`:''}
             </div>
           </div>`
         ).join('');
@@ -3802,8 +3802,8 @@ function acexRender() {
           </div>
         </div>
         <div class="acex-card-body">
-          ${a.docentes?`<div class="acex-row"><span class="acex-row-label">👨‍🏫 Docentes:</span><span class="acex-row-val">${a.docentes}</span></div>`:''}
-          ${a.grupos?`<div class="acex-row"><span class="acex-row-label">👥 Grupos:</span><span class="acex-row-val">${a.grupos}</span></div>`:''}
+          ${a.docentes&&a.docentes.length?`<div class="acex-row"><span class="acex-row-label">👨‍🏫 Docentes:</span><span class="acex-row-val">${acexArrayToStr(a.docentes)}</span></div>`:''}
+          ${a.grupos&&a.grupos.length?`<div class="acex-row"><span class="acex-row-label">👥 Grupos:</span><span class="acex-row-val">${acexArrayToStr(a.grupos)}</span></div>`:''}
           ${a.observaciones?`<div class="acex-row"><span class="acex-row-label">📝 Notas:</span><span class="acex-row-val">${a.observaciones}</span></div>`:''}
         </div>
       </div>`;
@@ -3837,19 +3837,30 @@ function acexAbrirModal(id) {
     const a = acexCache.find(x => x.id === id);
     if (a) {
       document.getElementById('acex-fecha').value = a.fecha;
-      document.getElementById('acex-docentes').value = a.docentes||'';
+      document.getElementById('acex-docentes').value = acexArrayToStr(a.docentes);
       document.getElementById('acex-obs').value = a.observaciones||'';
       document.querySelectorAll('input[name="acex-ses"]').forEach(cb => {
         cb.checked = (a.sesiones||[]).includes(cb.value);
       });
-      // Marcar los grupos ya guardados (texto separado por comas) que coincidan con grupos conocidos
-      const gruposGuardados = (a.grupos||'').split(',').map(g => g.trim()).filter(Boolean);
+      // Marcar los grupos ya guardados (array de Postgres) que coincidan con grupos conocidos
+      const gruposGuardados = acexArrayToList(a.grupos);
       document.querySelectorAll('input[name="acex-grupo-check"]').forEach(cb => {
         cb.checked = gruposGuardados.includes(cb.value);
       });
     }
   }
   document.getElementById('acex-modal').classList.remove('hidden');
+}
+
+// Los campos docentes/grupos son ARRAY en Supabase, pero por seguridad
+// (datos antiguos o llegados de otra forma) se admite también string.
+function acexArrayToList(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.map(v => String(v).trim()).filter(Boolean);
+  return String(val).split(',').map(v => v.trim()).filter(Boolean);
+}
+function acexArrayToStr(val) {
+  return acexArrayToList(val).join(', ');
 }
 
 function acexFiltrarGruposModal(query) {
@@ -3867,8 +3878,9 @@ function acexCerrarModal() {
 
 async function acexGuardar() {
   const fecha    = document.getElementById('acex-fecha').value;
-  const docentes = document.getElementById('acex-docentes').value.trim();
-  const grupos   = Array.from(document.querySelectorAll('input[name="acex-grupo-check"]:checked')).map(c=>c.value).join(', ');
+  const docentesTxt = document.getElementById('acex-docentes').value.trim();
+  const docentes = docentesTxt ? docentesTxt.split(',').map(d=>d.trim()).filter(Boolean) : [];
+  const grupos   = Array.from(document.querySelectorAll('input[name="acex-grupo-check"]:checked')).map(c=>c.value);
   const obs      = document.getElementById('acex-obs').value.trim();
   const sesiones = Array.from(document.querySelectorAll('input[name="acex-ses"]:checked')).map(c=>c.value);
   if (!fecha) { alert('Selecciona una fecha.'); return; }
@@ -3876,7 +3888,7 @@ async function acexGuardar() {
 
   const btn = document.querySelector('#acex-modal .btn-primary');
   btn.textContent = '⏳ Guardando...'; btn.disabled = true;
-  const payload = { fecha, sesiones, docentes: docentes||null, grupos: grupos||null, observaciones: obs||null };
+  const payload = { fecha, sesiones, docentes: docentes.length?docentes:null, grupos: grupos.length?grupos:null, observaciones: obs||null };
   try {
     if (acexEditId) {
       await supaFetch('PATCH', `acex?id=eq.${acexEditId}`, payload);
@@ -3942,8 +3954,8 @@ async function acexBuscarPorGrupo() {
     el.innerHTML = `<div class="state-msg"><p>Error: ${e.message}</p></div>`;
     return;
   }
-  // Coincidencia exacta de grupo dentro del campo "grupos" (separado por comas)
-  const coincidencias = rows.filter(a => (a.grupos||'').split(',').map(g=>g.trim()).includes(grupo));
+  // Coincidencia exacta de grupo dentro del array "grupos"
+  const coincidencias = rows.filter(a => acexArrayToList(a.grupos).includes(grupo));
 
   const dt = new Date(fecha+'T12:00:00');
   const dayLabel = dt.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
@@ -3962,8 +3974,8 @@ async function acexBuscarPorGrupo() {
         ${sesLabels.map(s=>`<span class="acex-ses-badge">${s}</span>`).join('')}
       </div>
       <div class="acex-card-body">
-        ${a.docentes?`<div class="acex-row"><span class="acex-row-label">👨‍🏫 Docentes:</span><span class="acex-row-val">${a.docentes}</span></div>`:''}
-        <div class="acex-row"><span class="acex-row-label">👥 Grupos:</span><span class="acex-row-val">${a.grupos}</span></div>
+        ${a.docentes&&a.docentes.length?`<div class="acex-row"><span class="acex-row-label">👨‍🏫 Docentes:</span><span class="acex-row-val">${acexArrayToStr(a.docentes)}</span></div>`:''}
+        <div class="acex-row"><span class="acex-row-label">👥 Grupos:</span><span class="acex-row-val">${acexArrayToStr(a.grupos)}</span></div>
         ${a.observaciones?`<div class="acex-row"><span class="acex-row-label">📝 Notas:</span><span class="acex-row-val">${a.observaciones}</span></div>`:''}
       </div>
     </div>`;
