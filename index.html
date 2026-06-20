@@ -991,6 +991,7 @@
       <button class="nav-btn solo-direccion" onclick="closeSidebar();showView('sustituciones');sustBuild()" id="nav-sustituciones"><span class="nav-icon">🔄</span><span class="nav-label">Sustituciones</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('acex');acexBuild()" id="nav-acex"><span class="nav-icon">🎒</span><span class="nav-label">ACEX</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('evaluaciones');evalBuild()" id="nav-evaluaciones"><span class="nav-icon">📝</span><span class="nav-label">Evaluaciones</span></button>
+      <button class="nav-btn" onclick="closeSidebar();showView('tablon');tablonBuild()" id="nav-tablon"><span class="nav-icon">📌</span><span class="nav-label">Tablón</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('acerca')" id="nav-acerca"><span class="nav-icon">ℹ️</span><span class="nav-label">Acerca de</span></button>
     </nav>
   </aside>
@@ -1070,6 +1071,12 @@
         <div class="mc-icon">📝</div>
         <div class="mc-title">Evaluaciones</div>
         <div class="mc-desc">Calendario e información de evaluaciones por etapa</div>
+        <span class="mc-arrow">→</span>
+      </div>
+      <div class="menu-card" onclick="showView('tablon');tablonBuild()">
+        <div class="mc-icon">📌</div>
+        <div class="mc-title">Tablón</div>
+        <div class="mc-desc">Anuncios del equipo directivo de esta semana</div>
         <span class="mc-arrow">→</span>
       </div>
       <div class="menu-card solo-direccion" onclick="showView('sustituciones');sustBuild()">
@@ -1483,6 +1490,16 @@
     </div>
   </div>
 
+  <!-- TABLÓN -->
+  <div class="view" id="view-tablon">
+    <div class="aus-header">
+      <h2>📌 Tablón de anuncios</h2>
+      <p>Información del equipo directivo para esta semana</p>
+    </div>
+    <div id="tablon-contenido-wrap">
+      <div class="state-msg"><div class="icon">📌</div><p>Cargando...</p></div>
+    </div>
+  </div>
 
 </main>
 
@@ -1544,6 +1561,11 @@ function applyRole() {
     evalEditando = false;
     evalRenderContenido();
   }
+  // Refrescar Tablón si esta vista esta activa
+  if (document.getElementById('view-tablon').classList.contains('active')) {
+    tablonEditando = false;
+    tablonRenderContenido();
+  }
 }
 function togglePw() { const i=document.getElementById('pw-input'); i.type=i.type==='password'?'text':'password'; }
 document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') checkLogin(); });
@@ -1562,7 +1584,7 @@ function showView(name) {
   if (btnEl) btnEl.classList.add('active');
   // Update breadcrumb
   const labels = {menu:'',horarios:'Horarios',grupos:'Grupos',guardias:'Guardianes',ausencias:'Ausencias',
-    cobertura:'Cobertura',aulas:'Aulas',ahora:'Ahora',sustituciones:'Sustituciones',acex:'ACEX',evaluaciones:'Evaluaciones',acerca:'Acerca de'};
+    cobertura:'Cobertura',aulas:'Aulas',ahora:'Ahora',sustituciones:'Sustituciones',acex:'ACEX',evaluaciones:'Evaluaciones',tablon:'Tablón',acerca:'Acerca de'};
   const label = labels[name] || name;
   const sep = document.getElementById('breadcrumb-sep');
   const cur = document.getElementById('breadcrumb-current');
@@ -3100,11 +3122,19 @@ async function ahoraRender() {
   }
   // Load ausencias for today
   await ausCargarDesdeSupa(ahoraFecha);
+  await tablonCargar();
   const timeStr = now.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
   const dateStr = now.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
 
   if (!dia) {
-    el.innerHTML = `<div class="ahora-fuera">
+    const tablonResumenFuera = tablonResumenTexto(tablonCache ? tablonCache.contenido : '', 140);
+    el.innerHTML = `
+      <div class="ahora-card" id="ahora-tablon-card" style="margin-bottom:16px;border-left:4px solid var(--accent)">
+        <h3>📌 Tablón del equipo directivo</h3>
+        <p style="font-size:.85rem;color:var(--text-mid);margin:6px 0 10px">${tablonResumenFuera || 'No hay anuncios esta semana.'}</p>
+        <button class="btn-secondary" style="font-size:.8rem" onclick="closeSidebar();showView('tablon');tablonBuild()">Ver tablón completo →</button>
+      </div>
+      <div class="ahora-fuera">
       <div class="icon">🏖️</div>
       <h3>Fuera de jornada lectiva</h3>
       <p>Hoy es ${dateStr}.<br>Los horarios son de lunes a viernes.</p>
@@ -3256,7 +3286,15 @@ async function ahoraRender() {
     aulasLibresHtml = '<span class="ahora-empty">No hay sesión en curso</span>';
   }
 
+  const tablonResumen = tablonResumenTexto(tablonCache ? tablonCache.contenido : '', 140);
+
   el.innerHTML = `
+    <div class="ahora-card" id="ahora-tablon-card" style="margin-bottom:16px;border-left:4px solid var(--accent)">
+      <h3>📌 Tablón del equipo directivo</h3>
+      <p style="font-size:.85rem;color:var(--text-mid);margin:6px 0 10px">${tablonResumen || 'No hay anuncios esta semana.'}</p>
+      <button class="btn-secondary" style="font-size:.8rem" onclick="closeSidebar();showView('tablon');tablonBuild()">Ver tablón completo →</button>
+    </div>
+
     <div style="margin-bottom:20px">
       <div style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:2px">${dateStr.charAt(0).toUpperCase()+dateStr.slice(1)}</div>
       <div class="ahora-clock">${timeStr}</div>
@@ -4002,6 +4040,148 @@ async function evalGuardar() {
     alert('Error al guardar: ' + e.message);
     if (btn) { btn.textContent = '✅ Guardar'; btn.disabled = false; }
   }
+}
+
+// ── TABLÓN DE ANUNCIOS ────────────────────────────────────────────────────
+let tablonCache = null;   // {id, contenido, actualizado_por, actualizado_en}
+let tablonEditando = false;
+
+async function tablonCargar() {
+  try {
+    const rows = await supaFetch('GET', 'tablon?select=*&order=id.asc&limit=1');
+    tablonCache = rows[0] || { id: 1, contenido: '', actualizado_por: null, actualizado_en: null };
+  } catch(e) {
+    tablonCache = tablonCache || { id: 1, contenido: '', actualizado_por: null, actualizado_en: null };
+  }
+  return tablonCache;
+}
+
+async function tablonBuild() {
+  const wrap = document.getElementById('tablon-contenido-wrap');
+  wrap.innerHTML = `<div class="state-msg"><div class="icon">⏳</div><p>Cargando...</p></div>`;
+  await tablonCargar();
+  tablonEditando = false;
+  tablonRenderContenido();
+}
+
+function tablonRenderContenido() {
+  const wrap = document.getElementById('tablon-contenido-wrap');
+  const reg = tablonCache || { contenido: '' };
+  const contenido = reg.contenido || '';
+  const esDireccion = USER_ROLE === 'direccion';
+
+  let metaTxt = '';
+  if (reg.actualizado_en) {
+    const f = new Date(reg.actualizado_en);
+    const fStr = f.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' ' + f.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+    metaTxt = `Última actualización: ${fStr}${reg.actualizado_por ? ' · ' + reg.actualizado_por : ''}`;
+  }
+
+  if (tablonEditando && esDireccion) {
+    wrap.innerHTML = `
+      <div class="eval-card">
+        <div class="eval-toolbar">
+          <button type="button" class="eval-tb-btn" title="Negrita" onclick="tablonCmd('bold')"><b>B</b></button>
+          <button type="button" class="eval-tb-btn" title="Cursiva" onclick="tablonCmd('italic')"><i>I</i></button>
+          <button type="button" class="eval-tb-btn" title="Subrayado" onclick="tablonCmd('underline')"><u>U</u></button>
+          <div class="eval-tb-sep"></div>
+          <button type="button" class="eval-tb-btn" title="Título" onclick="tablonCmd('formatBlock','H3')">H</button>
+          <button type="button" class="eval-tb-btn" title="Lista de puntos" onclick="tablonCmd('insertUnorderedList')">•≡</button>
+          <button type="button" class="eval-tb-btn" title="Lista numerada" onclick="tablonCmd('insertOrderedList')">1≡</button>
+          <div class="eval-tb-sep"></div>
+          <button type="button" class="eval-tb-btn" title="Insertar tabla" onclick="tablonInsertarTabla()">⊞</button>
+          <button type="button" class="eval-tb-btn" title="Deshacer" onclick="tablonCmd('undo')">↺</button>
+          <button type="button" class="eval-tb-btn" title="Quitar formato" onclick="tablonCmd('removeFormat')">✕</button>
+        </div>
+        <div id="tablon-editable" class="eval-editable" contenteditable="true">${contenido}</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
+          <button class="btn-secondary" onclick="tablonCancelarEdicion()">Cancelar</button>
+          <button class="btn-primary" onclick="tablonGuardar()">✅ Guardar</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('tablon-editable').focus();
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <h3 style="font-size:1rem;font-weight:800;color:var(--text)">📌 Esta semana</h3>
+        ${esDireccion ? `<button class="btn-primary" onclick="tablonEditar()">✏️ Editar</button>` : ''}
+      </div>
+      ${metaTxt ? `<div class="eval-meta" style="margin-bottom:10px">${metaTxt}</div>` : ''}
+      <div class="eval-view">${contenido ? contenido : '<p class="eval-empty-txt">El equipo directivo no ha publicado ningún anuncio esta semana.</p>'}</div>
+    </div>
+  `;
+}
+
+function tablonEditar() { tablonEditando = true; tablonRenderContenido(); }
+function tablonCancelarEdicion() { tablonEditando = false; tablonRenderContenido(); }
+
+function tablonCmd(cmd, valor) {
+  document.execCommand(cmd, false, valor || null);
+  document.getElementById('tablon-editable').focus();
+}
+
+function tablonInsertarTabla() {
+  const filas = parseInt(prompt('¿Cuántas filas?', '3'), 10);
+  const cols = parseInt(prompt('¿Cuántas columnas?', '3'), 10);
+  if (!filas || !cols || filas < 1 || cols < 1) return;
+  let html = '<table>';
+  for (let r = 0; r < filas; r++) {
+    html += '<tr>';
+    for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>';
+    html += '</tr>';
+  }
+  html += '</table><p><br></p>';
+  document.execCommand('insertHTML', false, html);
+  document.getElementById('tablon-editable').focus();
+}
+
+async function tablonGuardar() {
+  const html = document.getElementById('tablon-editable').innerHTML;
+  const nombreEditor = (sessionStorage.getItem('role') === 'direccion') ? '👔 Equipo Directivo' : '';
+  const id = (tablonCache && tablonCache.id) || 1;
+
+  const btn = document.querySelector('#tablon-contenido-wrap .btn-primary');
+  if (btn) { btn.textContent = '⏳ Guardando...'; btn.disabled = true; }
+  try {
+    await supaFetch('PATCH', `tablon?id=eq.${id}`, {
+      contenido: html,
+      actualizado_por: nombreEditor || null,
+      actualizado_en: new Date().toISOString()
+    });
+    tablonCache = { id, contenido: html, actualizado_por: nombreEditor, actualizado_en: new Date().toISOString() };
+    tablonEditando = false;
+    tablonRenderContenido();
+    ahoraMiniTablonRefrescar();
+  } catch(e) {
+    alert('Error al guardar: ' + e.message);
+    if (btn) { btn.textContent = '✅ Guardar'; btn.disabled = false; }
+  }
+}
+
+// Extrae texto plano de un HTML y lo recorta a N caracteres, para el resumen en "Ahora"
+function tablonResumenTexto(html, maxLen) {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const txt = (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+  if (txt.length <= maxLen) return txt;
+  return txt.slice(0, maxLen).trim() + '…';
+}
+
+async function ahoraMiniTablonRefrescar() {
+  const el = document.getElementById('ahora-tablon-card');
+  if (!el) return;
+  await tablonCargar();
+  const resumen = tablonResumenTexto(tablonCache.contenido, 140);
+  el.innerHTML = `
+    <h3>📌 Tablón del equipo directivo</h3>
+    <p style="font-size:.85rem;color:var(--text-mid);margin:6px 0 10px">${resumen || 'No hay anuncios esta semana.'}</p>
+    <button class="btn-secondary" style="font-size:.8rem" onclick="closeSidebar();showView('tablon');tablonBuild()">Ver tablón completo →</button>
+  `;
 }
 
 // ── AHORA MINI (widget en inicio) ─────────────────────────────────────────
