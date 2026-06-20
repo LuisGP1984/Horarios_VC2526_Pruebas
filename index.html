@@ -869,6 +869,12 @@
     }
     .ses-check-box input { accent-color:#8b5cf6; width:14px; height:14px; }
     .ses-check-box:has(input:checked) { border-color:#8b5cf6; background:#f5f3ff; color:#6d28d9; }
+    .ses-check-wrap { display:flex; flex-wrap:wrap; gap:6px; }
+    .acex-grupos-buscador input {
+      width:100%; padding:9px 12px; background:var(--surface); border:1.5px solid var(--border);
+      border-radius:8px; font-family:'Inter',sans-serif; font-size:.85rem; color:var(--text);
+    }
+    .acex-grupos-buscador input:focus { outline:none; border-color:var(--accent); }
 
     /* ── LEYENDA ─────────────────────────────────────── */
     details { margin-top: 32px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
@@ -1420,18 +1426,42 @@
       <h2>🎒 Actividades Complementarias y Extraescolares</h2>
       <p>ACEX programadas — semana actual</p>
     </div>
-    <div class="aus-toolbar" style="margin-bottom:20px">
-      <div class="control-group" style="flex:0 0 190px">
-        <label for="acex-fecha-filtro">Semana</label>
-        <input type="date" id="acex-fecha-filtro">
+
+    <div class="eval-pestanas">
+      <button class="eval-pestana-btn active" id="acex-tab-semana" onclick="acexCambiarTab('semana')">📅 Semana</button>
+      <button class="eval-pestana-btn" id="acex-tab-buscar" onclick="acexCambiarTab('buscar')">🔍 Buscar por grupo</button>
+    </div>
+
+    <div id="acex-panel-semana">
+      <div class="aus-toolbar" style="margin-bottom:20px">
+        <div class="control-group" style="flex:0 0 190px">
+          <label for="acex-fecha-filtro">Semana</label>
+          <input type="date" id="acex-fecha-filtro">
+        </div>
+        <div class="aus-actions">
+          <button class="btn-primary solo-direccion" onclick="acexAbrirModal()">＋ Nueva ACEX</button>
+          <button class="btn-secondary" onclick="acexBuild()">🔄 Actualizar</button>
+        </div>
       </div>
-      <div class="aus-actions">
-        <button class="btn-primary solo-direccion" onclick="acexAbrirModal()">＋ Nueva ACEX</button>
-        <button class="btn-secondary" onclick="acexBuild()">🔄 Actualizar</button>
+      <div id="acex-lista">
+        <div class="state-msg"><div class="icon">🎒</div><p>Cargando ACEX...</p></div>
       </div>
     </div>
-    <div id="acex-lista">
-      <div class="state-msg"><div class="icon">🎒</div><p>Cargando ACEX...</p></div>
+
+    <div id="acex-panel-buscar" style="display:none">
+      <div class="aus-toolbar" style="margin-bottom:20px">
+        <div class="control-group" style="flex:1 1 220px">
+          <label for="acex-buscar-grupo">Grupo</label>
+          <select id="acex-buscar-grupo" onchange="acexBuscarPorGrupo()"><option value="">— Selecciona un grupo —</option></select>
+        </div>
+        <div class="control-group" style="flex:0 0 190px">
+          <label for="acex-buscar-fecha">Día</label>
+          <input type="date" id="acex-buscar-fecha" onchange="acexBuscarPorGrupo()">
+        </div>
+      </div>
+      <div id="acex-buscar-resultado">
+        <div class="state-msg"><div class="icon">🔍</div><p>Selecciona un grupo y un día.</p></div>
+      </div>
     </div>
   </div>
 
@@ -1458,9 +1488,11 @@
             style="width:100%;padding:10px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);font-family:Inter,sans-serif;font-size:.88rem;color:var(--text);resize:vertical"></textarea>
         </div>
         <div class="control-group">
-          <label for="acex-grupos">Grupos que participan</label>
-          <input type="text" id="acex-grupos" placeholder="Ej: 1BCB, 2BHA, 03A..."
-            style="width:100%;padding:11px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);font-family:Inter,sans-serif;font-size:.92rem;color:var(--text)">
+          <label>Grupos que participan</label>
+          <div class="acex-grupos-buscador">
+            <input type="text" id="acex-grupos-buscador" placeholder="Buscar grupo..." oninput="acexFiltrarGruposModal(this.value)">
+          </div>
+          <div class="ses-check-wrap" id="acex-grupos-wrap" style="max-height:180px;overflow-y:auto;margin-top:6px"></div>
         </div>
         <div class="control-group">
           <label for="acex-obs">Observaciones</label>
@@ -3787,26 +3819,45 @@ function acexAbrirModal(id) {
   wrap.innerHTML = SESS_ALL.map(s =>
     `<label class="ses-check-box"><input type="checkbox" name="acex-ses" value="${s}" checked> ${SESS_LABELS_ACEX[s]}</label>`
   ).join('');
+
+  if (!GRUPOS_INDEX) buildGruposIndex();
+  const gruposOrdenados = Object.keys(GRUPOS_INDEX).sort((a,b) => a.localeCompare(b,'es'));
+  document.getElementById('acex-grupos-buscador').value = '';
+  document.getElementById('acex-grupos-wrap').innerHTML = gruposOrdenados.map(g =>
+    `<label class="ses-check-box acex-grupo-opt" data-grupo="${g}"><input type="checkbox" name="acex-grupo-check" value="${g}"> ${g}</label>`
+  ).join('');
+
   if (!id) {
     const today = new Date();
     const ymd = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
     document.getElementById('acex-fecha').value = ymd;
     document.getElementById('acex-docentes').value = '';
-    document.getElementById('acex-grupos').value = '';
     document.getElementById('acex-obs').value = '';
   } else {
     const a = acexCache.find(x => x.id === id);
     if (a) {
       document.getElementById('acex-fecha').value = a.fecha;
       document.getElementById('acex-docentes').value = a.docentes||'';
-      document.getElementById('acex-grupos').value = a.grupos||'';
       document.getElementById('acex-obs').value = a.observaciones||'';
       document.querySelectorAll('input[name="acex-ses"]').forEach(cb => {
         cb.checked = (a.sesiones||[]).includes(cb.value);
       });
+      // Marcar los grupos ya guardados (texto separado por comas) que coincidan con grupos conocidos
+      const gruposGuardados = (a.grupos||'').split(',').map(g => g.trim()).filter(Boolean);
+      document.querySelectorAll('input[name="acex-grupo-check"]').forEach(cb => {
+        cb.checked = gruposGuardados.includes(cb.value);
+      });
     }
   }
   document.getElementById('acex-modal').classList.remove('hidden');
+}
+
+function acexFiltrarGruposModal(query) {
+  const q = query.trim().toUpperCase();
+  document.querySelectorAll('#acex-grupos-wrap .acex-grupo-opt').forEach(el => {
+    const g = el.dataset.grupo.toUpperCase();
+    el.style.display = g.includes(q) ? '' : 'none';
+  });
 }
 
 function acexCerrarModal() {
@@ -3817,7 +3868,7 @@ function acexCerrarModal() {
 async function acexGuardar() {
   const fecha    = document.getElementById('acex-fecha').value;
   const docentes = document.getElementById('acex-docentes').value.trim();
-  const grupos   = document.getElementById('acex-grupos').value.trim();
+  const grupos   = Array.from(document.querySelectorAll('input[name="acex-grupo-check"]:checked')).map(c=>c.value).join(', ');
   const obs      = document.getElementById('acex-obs').value.trim();
   const sesiones = Array.from(document.querySelectorAll('input[name="acex-ses"]:checked')).map(c=>c.value);
   if (!fecha) { alert('Selecciona una fecha.'); return; }
@@ -3848,6 +3899,77 @@ async function acexEliminar(id) {
 }
 
 function acexEditar(id) { acexAbrirModal(id); }
+
+function acexCambiarTab(tab) {
+  document.getElementById('acex-tab-semana').classList.toggle('active', tab === 'semana');
+  document.getElementById('acex-tab-buscar').classList.toggle('active', tab === 'buscar');
+  document.getElementById('acex-panel-semana').style.display = tab === 'semana' ? '' : 'none';
+  document.getElementById('acex-panel-buscar').style.display = tab === 'buscar' ? '' : 'none';
+  if (tab === 'buscar') acexPrepararBuscador();
+}
+
+function acexPrepararBuscador() {
+  const sel = document.getElementById('acex-buscar-grupo');
+  if (sel.options.length <= 1) {
+    if (!GRUPOS_INDEX) buildGruposIndex();
+    const gruposOrdenados = Object.keys(GRUPOS_INDEX).sort((a,b) => a.localeCompare(b,'es'));
+    gruposOrdenados.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g; opt.textContent = g;
+      sel.appendChild(opt);
+    });
+  }
+  const fechaEl = document.getElementById('acex-buscar-fecha');
+  if (!fechaEl.value) {
+    const today = new Date();
+    fechaEl.value = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  }
+}
+
+async function acexBuscarPorGrupo() {
+  const grupo = document.getElementById('acex-buscar-grupo').value;
+  const fecha = document.getElementById('acex-buscar-fecha').value;
+  const el = document.getElementById('acex-buscar-resultado');
+  if (!grupo || !fecha) {
+    el.innerHTML = `<div class="state-msg"><div class="icon">🔍</div><p>Selecciona un grupo y un día.</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="state-msg"><div class="icon">⏳</div><p>Buscando...</p></div>`;
+  let rows;
+  try {
+    rows = await supaFetch('GET', `acex?fecha=eq.${fecha}&select=*`);
+  } catch(e) {
+    el.innerHTML = `<div class="state-msg"><p>Error: ${e.message}</p></div>`;
+    return;
+  }
+  // Coincidencia exacta de grupo dentro del campo "grupos" (separado por comas)
+  const coincidencias = rows.filter(a => (a.grupos||'').split(',').map(g=>g.trim()).includes(grupo));
+
+  const dt = new Date(fecha+'T12:00:00');
+  const dayLabel = dt.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+
+  if (coincidencias.length === 0) {
+    el.innerHTML = `<div class="state-msg"><div class="icon">✅</div><p>El grupo <b>${grupo}</b> no tiene ninguna ACEX el ${dayLabel}.</p></div>`;
+    return;
+  }
+
+  let html = `<div class="acex-semana-header">${dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)} · Grupo ${grupo}</div>`;
+  coincidencias.forEach(a => {
+    const sesLabels = (a.sesiones||[]).map(s => SESS_LABELS_ACEX[s]||s);
+    html += `<div class="acex-card">
+      <div class="acex-card-header">
+        <span class="acex-fecha-badge">🎒 ACEX</span>
+        ${sesLabels.map(s=>`<span class="acex-ses-badge">${s}</span>`).join('')}
+      </div>
+      <div class="acex-card-body">
+        ${a.docentes?`<div class="acex-row"><span class="acex-row-label">👨‍🏫 Docentes:</span><span class="acex-row-val">${a.docentes}</span></div>`:''}
+        <div class="acex-row"><span class="acex-row-label">👥 Grupos:</span><span class="acex-row-val">${a.grupos}</span></div>
+        ${a.observaciones?`<div class="acex-row"><span class="acex-row-label">📝 Notas:</span><span class="acex-row-val">${a.observaciones}</span></div>`:''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
 
 // ── EVALUACIONES ───────────────────────────────────────────────────────────
 const EVAL_ESTRUCTURA = {
