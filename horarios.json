@@ -72,7 +72,7 @@
         "Miercoles": {
           "2": {"tipo": "clase", "sigla": "", "grupo": "2BHB Empresa y Diseño de Modelos de Negocio", "materia": "", "aula": "111"},
           "3": {"tipo": "clase", "sigla": "", "grupo": "1BCB - 1BHS Economía", "materia": "", "aula": "114"},
-          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E - 03A Medidas de Atención Educativa", "materia": "", "aula": "102"},
+          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E, 03A Medidas de Atención Educativa", "materia": "", "aula": "102"},
           "5": {"tipo": "clase", "sigla": "", "grupo": "04B", "materia": "Economía y Emprendimiento", "aula": "106"},
           "6": {"tipo": "clase", "sigla": "", "grupo": "2BHA Empresa y Diseño de Modelos de Negocio", "materia": "", "aula": "112"}
         },
@@ -458,13 +458,13 @@
         "Lunes": {
           "3": {"tipo": "clase", "sigla": "", "grupo": "2BHB - 2BHA Historia de la Música y de la Danza", "materia": "", "aula": "113"},
           "3R": {"tipo": "actividad", "sigla": "RT", "grupo": "", "materia": "", "aula": ""},
-          "5": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C - 03B Música", "materia": "", "aula": "113"},
+          "5": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C, 03B Música", "materia": "", "aula": "113"},
           "6": {"tipo": "otro", "sigla": "CJEC CPFC", "grupo": "", "materia": "CJEC CPFC", "aula": ""},
           "7": {"tipo": "actividad", "sigla": "TUT", "grupo": "", "materia": "", "aula": ""}
         },
         "Martes": {
           "3": {"tipo": "actividad", "sigla": "RT", "grupo": "", "materia": "", "aula": ""},
-          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C - 03B Música", "materia": "", "aula": "113"},
+          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C, 03B Música", "materia": "", "aula": "113"},
           "4": {"tipo": "actividad", "sigla": "GREC", "grupo": "", "materia": "", "aula": ""},
           "5": {"tipo": "actividad", "sigla": "TLEC", "grupo": "", "materia": "", "aula": ""},
           "7": {"tipo": "clase", "sigla": "", "grupo": "04A", "materia": "- 04B - 04C - 4E Música", "aula": "113"},
@@ -485,7 +485,7 @@
         },
         "Viernes": {
           "3": {"tipo": "actividad", "sigla": "RCE", "grupo": "", "materia": "", "aula": ""},
-          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C - 03B Música", "materia": "", "aula": "113"},
+          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C, 03B Música", "materia": "", "aula": "113"},
           "5": {"tipo": "clase", "sigla": "", "grupo": "2BHB - 2BHA Historia de la Música y de la Danza", "materia": "", "aula": "113"},
           "6": {"tipo": "actividad", "sigla": "JDEP", "grupo": "", "materia": "", "aula": ""},
           "7": {"tipo": "actividad", "sigla": "JDEP", "grupo": "", "materia": "", "aula": ""}
@@ -3953,14 +3953,14 @@
       "horario": {
         "Lunes": {
           "3R": {"tipo": "clase", "sigla": "", "grupo": "01C", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"},
-          "5": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
+          "5": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
           "6": {"tipo": "clase", "sigla": "", "grupo": "1BCB Dibujo Técnico I", "materia": "", "aula": "LB1"},
           "7": {"tipo": "clase", "sigla": "", "grupo": "03A", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"}
         },
         "Martes": {
           "2": {"tipo": "clase", "sigla": "", "grupo": "1BCB Dibujo Técnico I", "materia": "", "aula": "LB1"},
           "3": {"tipo": "clase", "sigla": "", "grupo": "01B", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"},
-          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
+          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
           "5": {"tipo": "clase", "sigla": "", "grupo": "01C", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"},
           "6": {"tipo": "actividad", "sigla": "AMP", "grupo": "", "materia": "", "aula": ""},
           "7": {"tipo": "clase", "sigla": "", "grupo": "04A", "materia": "- 04B - 04C - 4E Expresión Artística", "aula": "109"}
@@ -3982,7 +3982,7 @@
         "Viernes": {
           "2": {"tipo": "clase", "sigla": "", "grupo": "03A", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"},
           "3": {"tipo": "actividad", "sigla": "G", "grupo": "", "materia": "", "aula": ""},
-          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E - 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
+          "3R": {"tipo": "clase", "sigla": "", "grupo": "3E, 03C Educación Plástica, Visual y Audiovisual", "materia": "", "aula": "109"},
           "5": {"tipo": "clase", "sigla": "", "grupo": "01B", "materia": "Educación Plástica, Visual y Audiovisual", "aula": "B10"},
           "6": {"tipo": "actividad", "sigla": "CHL", "grupo": "", "materia": "", "aula": ""}
         }

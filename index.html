@@ -926,6 +926,7 @@
       <button class="nav-btn" onclick="closeSidebar();showView('ahora');ahoraBuild()" id="nav-ahora"><span class="nav-icon">⚡</span><span class="nav-label">Ahora</span></button>
       <div class="nav-separator"></div>
       <button class="nav-btn" onclick="closeSidebar();showView('horarios')" id="nav-horarios"><span class="nav-icon">📅</span><span class="nav-label">Horarios</span></button>
+      <button class="nav-btn" onclick="closeSidebar();showView('grupos')" id="nav-grupos"><span class="nav-icon">👥</span><span class="nav-label">Grupos</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('guardias')" id="nav-guardias"><span class="nav-icon">🛡️</span><span class="nav-label">Guardianes</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('ausencias');ausRender()" id="nav-ausencias"><span class="nav-icon">📋</span><span class="nav-label">Ausencias</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('cobertura');cobBuildTable()" id="nav-cobertura"><span class="nav-icon">🔴</span><span class="nav-label">Cobertura</span></button>
@@ -970,6 +971,12 @@
         <div class="mc-icon">📅</div>
         <div class="mc-title">Horarios</div>
         <div class="mc-desc">Consulta el horario completo de cualquier docente</div>
+        <span class="mc-arrow">→</span>
+      </div>
+      <div class="menu-card" onclick="showView('grupos')">
+        <div class="mc-icon">👥</div>
+        <div class="mc-title">Grupos</div>
+        <div class="mc-desc">Consulta el horario completo de cualquier grupo: materia, docente y aula</div>
         <span class="mc-arrow">→</span>
       </div>
       <div class="menu-card" onclick="showView('guardias')">
@@ -1039,6 +1046,35 @@
       <div class="leyenda-grid" id="leyenda-grid"></div>
     </details>
   </div>
+
+  <!-- GRUPOS -->
+  <div class="view" id="view-grupos">
+    <div class="controls">
+      <div class="control-group">
+        <label for="sel-grupo">Grupo</label>
+        <select id="sel-grupo"><option value="">— Selecciona un grupo —</option></select>
+      </div>
+      <div class="control-group">
+        <label for="sel-grupo-dia">Día</label>
+        <select id="sel-grupo-dia">
+          <option value="">— Selecciona un día —</option>
+          <option value="Lunes">Lunes</option>
+          <option value="Martes">Martes</option>
+          <option value="Miercoles">Miércoles</option>
+          <option value="Jueves">Jueves</option>
+          <option value="Viernes">Viernes</option>
+        </select>
+      </div>
+    </div>
+    <div id="resultado-grupo">
+      <div class="state-msg"><div class="icon">👥</div><p>Selecciona un grupo y un día.</p></div>
+    </div>
+    <details>
+      <summary>Leyenda de siglas</summary>
+      <div class="leyenda-grid" id="leyenda-grid-grupo"></div>
+    </details>
+  </div>
+
 
   <!-- GUARDIAS -->
   <div class="view" id="view-guardias">
@@ -1441,7 +1477,7 @@ function showView(name) {
   const btnEl = document.getElementById('nav-'+name);
   if (btnEl) btnEl.classList.add('active');
   // Update breadcrumb
-  const labels = {menu:'',horarios:'Horarios',guardias:'Guardianes',ausencias:'Ausencias',
+  const labels = {menu:'',horarios:'Horarios',grupos:'Grupos',guardias:'Guardianes',ausencias:'Ausencias',
     cobertura:'Cobertura',aulas:'Aulas',ahora:'Ahora',sustituciones:'Sustituciones',acex:'ACEX',acerca:'Acerca de'};
   const label = labels[name] || name;
   const sep = document.getElementById('breadcrumb-sep');
@@ -1452,6 +1488,8 @@ function showView(name) {
 
 const legGrid = document.getElementById('leyenda-grid');
 LEYENDA.forEach(([s,d]) => { legGrid.innerHTML += `<div class="leyenda-item"><span class="leyenda-sigla">${s}</span><span class="leyenda-desc">${d}</span></div>`; });
+const legGridGrupo = document.getElementById('leyenda-grid-grupo');
+if (legGridGrupo) LEYENDA.forEach(([s,d]) => { legGridGrupo.innerHTML += `<div class="leyenda-item"><span class="leyenda-sigla">${s}</span><span class="leyenda-desc">${d}</span></div>`; });
 
 fetch('horarios.json')
   .then(r=>r.json())
@@ -1461,9 +1499,11 @@ fetch('horarios.json')
     await getSustituciones();
     // Build docente selector with sustituciones applied
     rebuildDocenteSelectors();
+    buildGruposIndex();
+    rebuildGrupoSelector();
     const todayMap = {1:'Lunes',2:'Martes',3:'Miercoles',4:'Jueves',5:'Viernes'};
     const t = todayMap[new Date().getDay()];
-    if (t) document.getElementById('sel-dia').value = t;
+    if (t) { document.getElementById('sel-dia').value = t; document.getElementById('sel-grupo-dia').value = t; }
     buildGuardiasTable(data);
     ahoraMiniRender();
     document.getElementById('loading').classList.add('fade');
@@ -1623,6 +1663,99 @@ function renderHorario() {
   });
   html+=`</div>`;
   el.innerHTML=html;
+}
+
+// ── GRUPOS ────────────────────────────────────────────────────────────────
+// Índice derivado: grupo -> { dia -> { sesion -> [ {docenteCode, materia, aula} ] } }
+// Se construye una sola vez a partir de DB.docentes, ya que el JSON está
+// indexado por docente y no por grupo.
+let GRUPOS_INDEX = null;
+
+function buildGruposIndex() {
+  if (!DB) return;
+  GRUPOS_INDEX = {};
+  Object.entries(DB.docentes).forEach(([code, info]) => {
+    Object.entries(info.horario || {}).forEach(([dia, horDia]) => {
+      Object.entries(horDia).forEach(([sess, slot]) => {
+        const slots = Array.isArray(slot) ? slot : [slot];
+        slots.forEach(s => {
+          if (s.tipo !== 'clase' || !s.grupo) return;
+          // Un slot puede tener varios grupos a la vez (ej. "03A, 03B")
+          s.grupo.split(',').map(g => g.trim()).filter(Boolean).forEach(g => {
+            if (!GRUPOS_INDEX[g]) GRUPOS_INDEX[g] = {};
+            if (!GRUPOS_INDEX[g][dia]) GRUPOS_INDEX[g][dia] = {};
+            if (!GRUPOS_INDEX[g][dia][sess]) GRUPOS_INDEX[g][dia][sess] = [];
+            GRUPOS_INDEX[g][dia][sess].push({ docenteCode: code, materia: s.materia, aula: s.aula });
+          });
+        });
+      });
+    });
+  });
+}
+
+function rebuildGrupoSelector() {
+  if (!DB) return;
+  if (!GRUPOS_INDEX) buildGruposIndex();
+  const sel = document.getElementById('sel-grupo');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona un grupo —</option>';
+  Object.keys(GRUPOS_INDEX).sort((a,b) => a.localeCompare(b,'es')).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function renderHorarioGrupo() {
+  if (!DB) return;
+  if (!GRUPOS_INDEX) buildGruposIndex();
+  const grupo = document.getElementById('sel-grupo').value;
+  const dia = document.getElementById('sel-grupo-dia').value;
+  const el = document.getElementById('resultado-grupo');
+  if (!grupo || !dia) { el.innerHTML = `<div class="state-msg"><div class="icon">👥</div><p>Selecciona un grupo y un día.</p></div>`; return; }
+
+  const sesiones = DB.sesiones;
+  const horDia = (GRUPOS_INDEX[grupo] && GRUPOS_INDEX[grupo][dia]) || {};
+  const activas = Object.keys(horDia).length;
+  const diaLabel = dia === 'Miercoles' ? 'Miércoles' : dia;
+
+  let html = `<div class="result-header">
+    <div class="result-avatar">👥</div>
+    <div>
+      <div class="result-name">Grupo ${grupo}</div>
+      <div class="result-day">${diaLabel} · ${activas} sesión${activas!==1?'es':''} con clase</div>
+    </div>
+  </div><div class="timeline">`;
+
+  const sessForDay = dia === 'Viernes' ? SESSION_ORDER.filter(s => s !== '8') : SESSION_ORDER;
+  sessForDay.forEach(sess => {
+    const meta = sesiones[sess];
+    const entradas = horDia[sess] || [];
+    const tipo = sess === '4' ? 'recreo' : (entradas.length === 0 ? 'libre' : 'clase');
+
+    html += `<div class="slot ${tipo}">
+      <div class="slot-time">
+        <span class="sess-label">${meta.label}</span>
+        <span class="sess-hora">${meta.hora.replace('-','–')}</span>
+      </div><div class="slot-body">`;
+
+    if (entradas.length === 0 && sess !== '4') {
+      html += `<span class="slot-libre-txt">Sin clase</span>`;
+    } else {
+      entradas.forEach(e => {
+        const docInfo = getDocenteEfectivo(e.docenteCode, getNombreEfectivo(e.docenteCode) || (DB.docentes[e.docenteCode]||{}).nombre || '');
+        html += `<div class="slot-materia">${e.materia||''}</div><div class="slot-meta">`;
+        if (docInfo.nombre) html += `<span class="tag grupo">🧑‍🏫 ${tc2(docInfo.nombre)}${docInfo.esSubstituto ? ' 🔄' : ''}</span>`;
+        if (e.aula) html += `<span class="tag aula">🚪 Aula ${e.aula}</span>`;
+        html += `</div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
 }
 
 
@@ -2545,8 +2678,8 @@ function aulasBuild() {
 
 
 // ── SUPABASE CONFIG ────────────────────────────────────────────────────────
-const SUPA_URL = 'https://deynmpaoprsavotvfyty.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRleW5tcGFvcHJzYXZvdHZmeXR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4ODkwMTYsImV4cCI6MjA5NzQ2NTAxNn0.eLAud_WG2RV4j9voQb85SAmYudig71tVYHRX60rBo0c';
+const SUPA_URL = 'https://afadwyvrbfyhqkqgxsgc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmYWR3eXZyYmZ5aHFrcWd4c2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNTEwOTMsImV4cCI6MjA5NjgyNzA5M30.EvGScuiVqtP2Q4eBnckCT7ZeIv-XAHiBxhFDH1sDRMk';
 
 async function supaFetch(method, path, body) {
   const res = await fetch(SUPA_URL + '/rest/v1/' + path, {
@@ -3436,6 +3569,7 @@ async function sustGuardar() {
     sustCerrarModal();
     await sustBuild();
     rebuildDocenteSelectors();
+    renderHorarioGrupo();
   } catch(e) {
     alert('Error: ' + e.message);
   } finally {
@@ -3449,6 +3583,7 @@ async function sustCancelar(id) {
     await supaFetch('PATCH', `sustituciones?id=eq.${id}`, { activa: false });
     await sustBuild();
     rebuildDocenteSelectors();
+    renderHorarioGrupo();
   } catch(e) { alert('Error: ' + e.message); }
 }
 
@@ -3717,6 +3852,8 @@ setTimeout(fixLayout, 1500);
 
 document.getElementById('sel-docente').addEventListener('change', renderHorario);
 document.getElementById('sel-dia').addEventListener('change', renderHorario);
+document.getElementById('sel-grupo').addEventListener('change', renderHorarioGrupo);
+document.getElementById('sel-grupo-dia').addEventListener('change', renderHorarioGrupo);
 
 </script>
 </body>
