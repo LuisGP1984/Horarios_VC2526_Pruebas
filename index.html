@@ -395,6 +395,62 @@
       padding: 16px 20px; box-shadow: var(--shadow);
     }
     .aus-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; padding-bottom: 1px; }
+
+    /* ── EVALUACIONES ── */
+    .eval-etapas { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .eval-etapa-btn {
+      padding: 10px 22px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: var(--card); color: var(--text-mid); font-family: 'Inter', sans-serif;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all .15s;
+    }
+    .eval-etapa-btn:hover { border-color: var(--accent); }
+    .eval-etapa-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .eval-pestanas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .eval-pestana-btn {
+      padding: 8px 16px; border-radius: var(--radius); border: 1.5px solid var(--border);
+      background: var(--card); color: var(--text-mid); font-family: 'Inter', sans-serif;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s;
+    }
+    .eval-pestana-btn:hover { border-color: var(--accent); }
+    .eval-pestana-btn.active { background: var(--surface2); color: var(--accent); border-color: var(--accent); }
+    .eval-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 20px 24px;
+    }
+    .eval-card-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .eval-meta { font-size: 0.78rem; color: var(--text-mid); }
+    .eval-toolbar {
+      display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 6px; margin-bottom: 10px;
+    }
+    .eval-tb-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent; border-radius: 6px; cursor: pointer;
+      font-size: 0.95rem; color: var(--text); transition: background .15s;
+    }
+    .eval-tb-btn:hover { background: var(--card); }
+    .eval-tb-sep { width: 1px; background: var(--border); margin: 4px 4px; align-self: stretch; }
+    .eval-editable {
+      min-height: 260px; max-height: 60vh; overflow-y: auto;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 16px 18px; background: var(--card); color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 0.92rem; line-height: 1.6;
+    }
+    .eval-editable:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .eval-editable table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    .eval-editable table td, .eval-editable table th {
+      border: 1px solid var(--border); padding: 6px 10px;
+    }
+    .eval-view { padding: 4px 2px; }
+    .eval-view table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    .eval-view table td, .eval-view table th { border: 1px solid var(--border); padding: 6px 10px; }
+    .eval-view ul, .eval-view ol { padding-left: 22px; margin: 8px 0; }
+    .eval-empty-txt { color: var(--text-mid); font-style: italic; font-size: 0.88rem; }
+
     input[type="date"] {
       width: 100%; padding: 11px 14px;
       background: var(--card); border: 1.5px solid var(--border);
@@ -934,6 +990,7 @@
       <div class="nav-separator"></div>
       <button class="nav-btn solo-direccion" onclick="closeSidebar();showView('sustituciones');sustBuild()" id="nav-sustituciones"><span class="nav-icon">🔄</span><span class="nav-label">Sustituciones</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('acex');acexBuild()" id="nav-acex"><span class="nav-icon">🎒</span><span class="nav-label">ACEX</span></button>
+      <button class="nav-btn" onclick="closeSidebar();showView('evaluaciones');evalBuild()" id="nav-evaluaciones"><span class="nav-icon">📝</span><span class="nav-label">Evaluaciones</span></button>
       <button class="nav-btn" onclick="closeSidebar();showView('acerca')" id="nav-acerca"><span class="nav-icon">ℹ️</span><span class="nav-label">Acerca de</span></button>
     </nav>
   </aside>
@@ -1007,6 +1064,12 @@
         <div class="mc-icon">🎒</div>
         <div class="mc-title">ACEX</div>
         <div class="mc-desc">Actividades Complementarias y Extraescolares</div>
+        <span class="mc-arrow">→</span>
+      </div>
+      <div class="menu-card" onclick="showView('evaluaciones');evalBuild()">
+        <div class="mc-icon">📝</div>
+        <div class="mc-title">Evaluaciones</div>
+        <div class="mc-desc">Calendario e información de evaluaciones por etapa</div>
         <span class="mc-arrow">→</span>
       </div>
       <div class="menu-card solo-direccion" onclick="showView('sustituciones');sustBuild()">
@@ -1405,6 +1468,22 @@
     </div>
   </div>
 
+  <!-- EVALUACIONES -->
+  <div class="view" id="view-evaluaciones">
+    <div class="aus-header">
+      <h2>📝 Evaluaciones</h2>
+      <p>Calendario e información de evaluaciones por etapa</p>
+    </div>
+
+    <div class="eval-etapas" id="eval-etapas-wrap"></div>
+    <div class="eval-pestanas" id="eval-pestanas-wrap"></div>
+
+    <div id="eval-contenido-wrap">
+      <div class="state-msg"><div class="icon">📝</div><p>Selecciona una etapa.</p></div>
+    </div>
+  </div>
+
+
 </main>
 
 <script>
@@ -1460,6 +1539,11 @@ function applyRole() {
     badge.textContent = isDireccion ? '👔 Dirección' : '👤 Docente';
     badge.style.background = isDireccion ? '#1e4d9b' : '#374151';
   }
+  // Refrescar Evaluaciones si esta vista esta activa (el botón Editar depende del rol)
+  if (evalEtapaActual && document.getElementById('view-evaluaciones').classList.contains('active')) {
+    evalEditando = false;
+    evalRenderContenido();
+  }
 }
 function togglePw() { const i=document.getElementById('pw-input'); i.type=i.type==='password'?'text':'password'; }
 document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') checkLogin(); });
@@ -1478,7 +1562,7 @@ function showView(name) {
   if (btnEl) btnEl.classList.add('active');
   // Update breadcrumb
   const labels = {menu:'',horarios:'Horarios',grupos:'Grupos',guardias:'Guardianes',ausencias:'Ausencias',
-    cobertura:'Cobertura',aulas:'Aulas',ahora:'Ahora',sustituciones:'Sustituciones',acex:'ACEX',acerca:'Acerca de'};
+    cobertura:'Cobertura',aulas:'Aulas',ahora:'Ahora',sustituciones:'Sustituciones',acex:'ACEX',evaluaciones:'Evaluaciones',acerca:'Acerca de'};
   const label = labels[name] || name;
   const sep = document.getElementById('breadcrumb-sep');
   const cur = document.getElementById('breadcrumb-current');
@@ -3726,6 +3810,199 @@ async function acexEliminar(id) {
 }
 
 function acexEditar(id) { acexAbrirModal(id); }
+
+// ── EVALUACIONES ───────────────────────────────────────────────────────────
+const EVAL_ESTRUCTURA = {
+  ESO: { label: 'ESO', pestanas: [
+    { key: '1EVA', label: '1ª EVA' },
+    { key: '2EVA', label: '2ª EVA' },
+    { key: 'FINAL', label: 'Final' },
+  ]},
+  BTO: { label: 'Bachillerato', pestanas: [
+    { key: '1EVA', label: '1ª EVA' },
+    { key: '2EVA', label: '2ª EVA' },
+    { key: 'FINAL_ORD', label: 'Final ordinaria' },
+    { key: 'FINAL_EXT', label: 'Final extraordinaria' },
+  ]},
+  FP: { label: 'FP', pestanas: [
+    { key: '1EVA', label: '1ª EVA' },
+    { key: '2EVA', label: '2ª EVA' },
+    { key: 'FINAL_1', label: 'Primera final' },
+    { key: 'FINAL_2', label: 'Segunda final' },
+  ]},
+};
+
+let evalEtapaActual = null;
+let evalPestanaActual = null;
+let evalCache = {};        // "ETAPA|PESTANA" -> {contenido, actualizado_por, actualizado_en}
+let evalEditando = false;
+
+async function evalBuild() {
+  if (!evalEtapaActual) evalEtapaActual = 'ESO';
+  evalRenderEtapas();
+  await evalCargarEtapa(evalEtapaActual);
+}
+
+function evalRenderEtapas() {
+  const wrap = document.getElementById('eval-etapas-wrap');
+  wrap.innerHTML = Object.entries(EVAL_ESTRUCTURA).map(([key, e]) => `
+    <button class="eval-etapa-btn ${key===evalEtapaActual?'active':''}" onclick="evalSeleccionarEtapa('${key}')">${e.label}</button>
+  `).join('');
+}
+
+async function evalSeleccionarEtapa(etapa) {
+  evalEtapaActual = etapa;
+  evalPestanaActual = null;
+  evalEditando = false;
+  evalRenderEtapas();
+  await evalCargarEtapa(etapa);
+}
+
+async function evalCargarEtapa(etapa) {
+  const wrapContenido = document.getElementById('eval-contenido-wrap');
+  wrapContenido.innerHTML = `<div class="state-msg"><div class="icon">⏳</div><p>Cargando...</p></div>`;
+  try {
+    const rows = await supaFetch('GET', `evaluaciones?etapa=eq.${etapa}&select=*`);
+    rows.forEach(r => { evalCache[etapa + '|' + r.pestana] = r; });
+  } catch(e) {
+    wrapContenido.innerHTML = `<div class="state-msg"><p>Error cargando evaluaciones.</p></div>`;
+    return;
+  }
+  const pestanas = EVAL_ESTRUCTURA[etapa].pestanas;
+  if (!evalPestanaActual || !pestanas.some(p => p.key === evalPestanaActual)) {
+    evalPestanaActual = pestanas[0].key;
+  }
+  evalRenderPestanas();
+  evalRenderContenido();
+}
+
+function evalRenderPestanas() {
+  const wrap = document.getElementById('eval-pestanas-wrap');
+  const pestanas = EVAL_ESTRUCTURA[evalEtapaActual].pestanas;
+  wrap.innerHTML = pestanas.map(p => `
+    <button class="eval-pestana-btn ${p.key===evalPestanaActual?'active':''}" onclick="evalSeleccionarPestana('${p.key}')">${p.label}</button>
+  `).join('');
+}
+
+function evalSeleccionarPestana(key) {
+  evalPestanaActual = key;
+  evalEditando = false;
+  evalRenderPestanas();
+  evalRenderContenido();
+}
+
+function evalClaveActual() { return evalEtapaActual + '|' + evalPestanaActual; }
+
+function evalRenderContenido() {
+  const wrap = document.getElementById('eval-contenido-wrap');
+  const reg = evalCache[evalClaveActual()];
+  const contenido = reg ? (reg.contenido || '') : '';
+  const pestanaLabel = (EVAL_ESTRUCTURA[evalEtapaActual].pestanas.find(p => p.key === evalPestanaActual) || {}).label || '';
+  const etapaLabel = EVAL_ESTRUCTURA[evalEtapaActual].label;
+
+  let metaTxt = '';
+  if (reg && reg.actualizado_en) {
+    const f = new Date(reg.actualizado_en);
+    const fStr = f.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' ' + f.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+    metaTxt = `Última actualización: ${fStr}${reg.actualizado_por ? ' · ' + reg.actualizado_por : ''}`;
+  }
+
+  const esDireccion = USER_ROLE === 'direccion';
+
+  if (evalEditando && esDireccion) {
+    wrap.innerHTML = `
+      <div class="eval-card">
+        <div class="eval-card-header">
+          <h3 style="font-size:1rem;font-weight:800;color:var(--text)">${etapaLabel} · ${pestanaLabel}</h3>
+        </div>
+        <div class="eval-toolbar">
+          <button type="button" class="eval-tb-btn" title="Negrita" onclick="evalCmd('bold')"><b>B</b></button>
+          <button type="button" class="eval-tb-btn" title="Cursiva" onclick="evalCmd('italic')"><i>I</i></button>
+          <button type="button" class="eval-tb-btn" title="Subrayado" onclick="evalCmd('underline')"><u>U</u></button>
+          <div class="eval-tb-sep"></div>
+          <button type="button" class="eval-tb-btn" title="Título" onclick="evalCmd('formatBlock','H3')">H</button>
+          <button type="button" class="eval-tb-btn" title="Lista de puntos" onclick="evalCmd('insertUnorderedList')">•≡</button>
+          <button type="button" class="eval-tb-btn" title="Lista numerada" onclick="evalCmd('insertOrderedList')">1≡</button>
+          <div class="eval-tb-sep"></div>
+          <button type="button" class="eval-tb-btn" title="Insertar tabla" onclick="evalInsertarTabla()">⊞</button>
+          <button type="button" class="eval-tb-btn" title="Deshacer" onclick="evalCmd('undo')">↺</button>
+          <button type="button" class="eval-tb-btn" title="Quitar formato" onclick="evalCmd('removeFormat')">✕</button>
+        </div>
+        <div id="eval-editable" class="eval-editable" contenteditable="true">${contenido || ''}</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
+          <button class="btn-secondary" onclick="evalCancelarEdicion()">Cancelar</button>
+          <button class="btn-primary" onclick="evalGuardar()">✅ Guardar</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('eval-editable').focus();
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <h3 style="font-size:1rem;font-weight:800;color:var(--text)">${etapaLabel} · ${pestanaLabel}</h3>
+        ${esDireccion ? `<button class="btn-primary" onclick="evalEditar()">✏️ Editar</button>` : ''}
+      </div>
+      ${metaTxt ? `<div class="eval-meta" style="margin-bottom:10px">${metaTxt}</div>` : ''}
+      <div class="eval-view">${contenido ? contenido : '<p class="eval-empty-txt">Todavía no hay información publicada para esta evaluación.</p>'}</div>
+    </div>
+  `;
+}
+
+function evalEditar() {
+  evalEditando = true;
+  evalRenderContenido();
+}
+
+function evalCancelarEdicion() {
+  evalEditando = false;
+  evalRenderContenido();
+}
+
+function evalCmd(cmd, valor) {
+  document.execCommand(cmd, false, valor || null);
+  document.getElementById('eval-editable').focus();
+}
+
+function evalInsertarTabla() {
+  const filas = parseInt(prompt('¿Cuántas filas?', '3'), 10);
+  const cols = parseInt(prompt('¿Cuántas columnas?', '3'), 10);
+  if (!filas || !cols || filas < 1 || cols < 1) return;
+  let html = '<table>';
+  for (let r = 0; r < filas; r++) {
+    html += '<tr>';
+    for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>';
+    html += '</tr>';
+  }
+  html += '</table><p><br></p>';
+  document.execCommand('insertHTML', false, html);
+  document.getElementById('eval-editable').focus();
+}
+
+async function evalGuardar() {
+  const html = document.getElementById('eval-editable').innerHTML;
+  const etapa = evalEtapaActual;
+  const pestana = evalPestanaActual;
+  const nombreEditor = (sessionStorage.getItem('role') === 'direccion') ? '👔 Equipo Directivo' : '';
+
+  const btn = document.querySelector('#eval-contenido-wrap .btn-primary');
+  if (btn) { btn.textContent = '⏳ Guardando...'; btn.disabled = true; }
+  try {
+    await supaFetch('PATCH', `evaluaciones?etapa=eq.${etapa}&pestana=eq.${pestana}`, {
+      contenido: html,
+      actualizado_por: nombreEditor || null,
+      actualizado_en: new Date().toISOString()
+    });
+    evalCache[etapa + '|' + pestana] = { etapa, pestana, contenido: html, actualizado_por: nombreEditor, actualizado_en: new Date().toISOString() };
+    evalEditando = false;
+    evalRenderContenido();
+  } catch(e) {
+    alert('Error al guardar: ' + e.message);
+    if (btn) { btn.textContent = '✅ Guardar'; btn.disabled = false; }
+  }
+}
 
 // ── AHORA MINI (widget en inicio) ─────────────────────────────────────────
 function ahoraMiniRender() {
